@@ -2,8 +2,9 @@
 Exercise
 
 
-Making use of temp tables and UPDATE statements, re-write an optimized version of the query in the "Optimizing With UPDATE - Exercise Starter Code.sql" file, which you'll find in the resources for this section.
+Using indexes, further optimize your solution to the "Optimizing With UPDATE" exercise. You can find the starter code in the "Optimizing With UPDATE - Exercise Starter Code.sql" file in the Resources for this section.
 */
+
 
 -- unoptimized query
 SELECT 
@@ -41,7 +42,7 @@ CREATE TABLE #Person
 	EmailAddress NVARCHAR(50)
 )
 
-INSERT INTO #Person
+INSERT INTO #Person 
 (
 	BusinessEntityID,
 	Title,
@@ -57,33 +58,39 @@ INSERT INTO #Person
 		LastName
 	FROM AdventureWorks2019.Person.Person
 
+
 -- PhoneNumber, PhoneNumberTypeID
+CREATE CLUSTERED INDEX person_idx
+ON #Person(BusinessEntityID)
+
 UPDATE #Person
-SET 
+SET
 	PhoneNumber = B.PhoneNumber,
 	PhoneNumberTypeID = B.PhoneNumberTypeID
-		FROM #Person A
-			LEFT JOIN AdventureWorks2019.Person.PersonPhone B
-				ON A.BusinessEntityID = B.BusinessEntityID
+FROM #Person A
+	LEFT JOIN AdventureWorks2019.Person.PersonPhone B
+		ON A.BusinessEntityID = B.BusinessEntityID
+
 
 
 -- PhoneNumberType
+CREATE NONCLUSTERED INDEX phonenumbertype_idx
+ON #Person(PhoneNumberTypeID)
+
 UPDATE #Person
 SET
 	PhoneNumberType = B.Name
-		FROM #Person A
-			LEFT JOIN AdventureWorks2019.Person.PhoneNumberType B
-				ON A.PhoneNumberTypeID = B.PhoneNumberTypeID
-
+FROM #Person A
+	LEFT JOIN AdventureWorks2019.Person.PhoneNumberType B
+		ON A.PhoneNumberTypeID = B.PhoneNumberTypeID
 
 -- EmailAddress
 UPDATE #Person
 SET
 	EmailAddress = B.EmailAddress
-		FROM #Person A
-			LEFT JOIN AdventureWorks2019.Person.EmailAddress B
-				ON A.BusinessEntityID = B.BusinessEntityID
-
+FROM #Person A
+	LEFT JOIN AdventureWorks2019.Person.EmailAddress B
+		ON A.BusinessEntityID = B.BusinessEntityID
 
 SELECT 
 	BusinessEntityID,
@@ -95,6 +102,3 @@ SELECT
 	PhoneNumberType,
 	EmailAddress
 FROM #Person
-
-
---DROP TABLE #Person
